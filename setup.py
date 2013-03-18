@@ -30,7 +30,7 @@ setup(
     ],
     install_requires=[
         'django>=1.2',
-        'PIL',
+        'Pillow',
     ],
     tests_require=[
         'nose',
