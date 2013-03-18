@@ -7,7 +7,7 @@ community.
 - `Latest documentation on Read The Docs <https://django-badger.readthedocs.org/en/latest/>`_
   (`source <https://github.com/lmorchard/django-badger/tree/master/docs>`_)
 - `Task board on Huboard <http://huboard.com/lmorchard/django-badger/board>`_
-  (`source <https://github.com/lmorchard/django-badger/issues>`_)
+  (`source <https://github.com/mozilla/django-badger/issues>`_)
 
 .. |build-status| image:: https://secure.travis-ci.org/lmorchard/django-badger.png?branch=master
            :target: http://travis-ci.org/lmorchard/django-badger
