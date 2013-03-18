@@ -75,7 +75,7 @@ else:
     notification = None
 
 import badger
-from .signals import (badge_will_be_awarded, badge_was_awarded, 
+from .signals import (badge_will_be_awarded, badge_was_awarded,
                       nomination_will_be_approved, nomination_was_approved,
                       nomination_will_be_accepted, nomination_was_accepted,
                       nomination_will_be_rejected, nomination_was_rejected,
@@ -165,7 +165,7 @@ def slugify(txt):
     # remove trailing whitespace
     txt = txt.strip()
     # remove spaces before and after dashes
-    txt = re.sub('\s*-\s*','-', txt, re.UNICODE)
+    txt = re.sub('\s*-\s*', '-', txt, re.UNICODE)
     # replace remaining spaces with dashes
     txt = re.sub('[\s/]', '-', txt, re.UNICODE)
     # replace colons between numbers with dashes
@@ -173,7 +173,7 @@ def slugify(txt):
     # replace double quotes with single quotes
     txt = re.sub('"', "'", txt, re.UNICODE)
     # remove some characters altogether
-    txt = re.sub(r'[?,:!@#~`+=$%^&\\*()\[\]{}<>]','',txt, re.UNICODE)
+    txt = re.sub(r'[?,:!@#~`+=$%^&\\*()\[\]{}<>]', '', txt, re.UNICODE)
     return txt
 
 
@@ -253,23 +253,22 @@ class SearchManagerMixin(object):
         ''' Splits the query string in invidual keywords, getting rid of unecessary spaces
             and grouping quoted words together.
             Example:
-            
+
             >>> normalize_query('  some random  words "with   quotes  " and   spaces')
             ['some', 'random', 'words', 'with quotes', 'and', 'spaces']
-        
+
         '''
-        return [normspace(' ', (t[0] or t[1]).strip()) for t in findterms(query_string)] 
+        return [normspace(' ', (t[0] or t[1]).strip()) for t in findterms(query_string)]
 
     # See: http://www.julienphalip.com/blog/2008/08/16/adding-search-django-site-snap/
     def _get_query(self, query_string, search_fields):
         ''' Returns a query, that is a combination of Q objects. That combination
             aims to search keywords within a model by testing the given search fields.
-        
         '''
-        query = None # Query to search for every search term        
+        query = None  # Query to search for every search term
         terms = self._normalize_query(query_string)
         for term in terms:
-            or_query = None # Query to search for a given term in each field
+            or_query = None  # Query to search for a given term in each field
             for field_name in search_fields:
                 q = Q(**{"%s__icontains" % field_name: term})
                 if or_query is None:
@@ -348,7 +347,7 @@ class BadgeManager(models.Manager, SearchManagerMixin):
 
         # TODO: There has got to be a better way to do this. I got lost in
         # Django model bits, though.
-        
+
         # Gather list of tags sorted by use frequency
         ct = ContentType.objects.get_for_model(Badge)
         tag_counts = (TaggedItem.objects
@@ -359,11 +358,11 @@ class BadgeManager(models.Manager, SearchManagerMixin):
 
         # Gather set of tag IDs from list
         tag_ids = set(x['tag'] for x in tag_counts)
-        
+
         # Gather and map tag objects to IDs
-        tags_by_id = dict((x.pk, x) 
+        tags_by_id = dict((x.pk, x)
             for x in Tag.objects.filter(pk__in=tag_ids))
-        
+
         # Join tag objects up with counts
         tags_with_counts = [
             dict(count=x['count'], tag=tags_by_id[x['tag']])
@@ -383,7 +382,7 @@ class Badge(models.Model):
     description = models.TextField(blank=True,
             help_text="Longer description of the badge and its criteria")
     image = models.ImageField(blank=True, null=True,
-            storage=BADGE_UPLOADS_FS, upload_to=mk_upload_to('image','png'),
+            storage=BADGE_UPLOADS_FS, upload_to=mk_upload_to('image', 'png'),
             help_text="Upload an image to represent the badge")
     prerequisites = models.ManyToManyField('self', symmetrical=False,
             blank=True, null=True,
@@ -396,7 +395,7 @@ class Badge(models.Model):
                       "one-per-person?")
 
     nominations_accepted = models.BooleanField(default=True, blank=True,
-            help_text="Should this badge accept nominations from " 
+            help_text="Should this badge accept nominations from "
                       "other users?")
 
     nominations_autoapproved = models.BooleanField(default=False, blank=True,
@@ -441,10 +440,10 @@ class Badge(models.Model):
             self.slug = slugify(self.title)
 
         super(Badge, self).save(**kwargs)
-        
+
         if notification:
             if self.creator:
-                notification.send([self.creator], 'badge_edited', 
+                notification.send([self.creator], 'badge_edited',
                                   dict(badge=self,
                                        protocol=DEFAULT_HTTP_PROTOCOL))
 
@@ -485,7 +484,7 @@ class Badge(models.Model):
             return True
         if user == self.creator:
             return True
-        
+
         # TODO: List of delegates for whom awarding is allowed
 
         return False
@@ -675,7 +674,7 @@ class Award(models.Model):
     badge = models.ForeignKey(Badge)
     image = models.ImageField(blank=True, null=True,
                               storage=BADGE_UPLOADS_FS,
-                              upload_to=mk_upload_to('image','png'))
+                              upload_to=mk_upload_to('image', 'png'))
     claim_code = models.CharField(max_length=32, blank=True,
             default='', unique=False, db_index=True,
             help_text="Code used to claim this award")
@@ -831,7 +830,7 @@ class Award(models.Model):
         # see: https://github.com/mozilla/openbadges/blob/development/controllers/baker.js
         try:
             from PIL import PngImagePlugin
-        except ImportError,e:
+        except ImportError, e:
             import PngImagePlugin
         meta = PngImagePlugin.PngInfo()
 
@@ -1142,7 +1141,7 @@ class Nomination(models.Model):
                                                    self.creator)
 
     def get_absolute_url(self):
-        return reverse('badger.views.nomination_detail', 
+        return reverse('badger.views.nomination_detail',
                        args=(self.badge.slug, self.id))
 
     def save(self, *args, **kwargs):
@@ -1169,11 +1168,11 @@ class Nomination(models.Model):
                                     nomination=self)
 
     def allows_detail_by(self, user):
-        if (user.is_staff or 
+        if (user.is_staff or
                user.is_superuser or
                user == self.badge.creator or
                user == self.nominee or
-               user == self.creator ):
+               user == self.creator):
             return True
 
         # TODO: List of delegates empowered by badge creator to approve nominations
@@ -1220,7 +1219,7 @@ class Nomination(models.Model):
             notification.send([self.nominee], 'nomination_received',
                               dict(nomination=self,
                                    protocol=DEFAULT_HTTP_PROTOCOL))
-        
+
         return self
 
     @property
@@ -1258,7 +1257,7 @@ class Nomination(models.Model):
                 notification.send([self.creator], 'nomination_accepted',
                                   dict(nomination=self,
                                        protocol=DEFAULT_HTTP_PROTOCOL))
-        
+
         return self
 
     @property
@@ -1297,7 +1296,7 @@ class Nomination(models.Model):
                 notification.send([self.creator], 'nomination_rejected',
                                   dict(nomination=self,
                                        protocol=DEFAULT_HTTP_PROTOCOL))
-        
+
         return self
 
 
