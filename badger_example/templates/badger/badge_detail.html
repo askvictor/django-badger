@@ -24,7 +24,7 @@
     <h2>Recent awards</h2>
     <nav><ul>
         <li>
-            <a href="{% url badger.views.awards_list  badge.slug %}">More...</a>
+            <a href="{% url 'badger.views.awards_list'  badge.slug %}">More...</a>
             <a href="{% url 'badger.feeds.awards_by_badge' 'atom' badge.slug %}"><img src="/images/feed.png"  width="20" /></a>
         </li>
     </ul></nav>
