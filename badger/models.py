@@ -81,6 +81,8 @@ from .signals import (badge_will_be_awarded, badge_was_awarded,
                       nomination_will_be_rejected, nomination_was_rejected,
                       user_will_be_nominated, user_was_nominated)
 
+User = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
+
 OBI_VERSION = "0.5.0"
 
 IMG_MAX_SIZE = getattr(settings, "BADGER_IMG_MAX_SIZE", (256, 256))
