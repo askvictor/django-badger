@@ -386,6 +386,9 @@ class Badge(models.Model):
     image = models.ImageField(blank=True, null=True,
             storage=BADGE_UPLOADS_FS, upload_to=mk_upload_to('image', 'png'),
             help_text="Upload an image to represent the badge")
+    wb_image = models.ImageField(blank=True, null=True,
+            storage=BADGE_UPLOADS_FS, upload_to=mk_upload_to('image', 'png'),
+            help_text="Upload an white-black image to represent the badge")
     prerequisites = models.ManyToManyField('self', symmetrical=False,
             blank=True, null=True,
             help_text="When all of the selected badges have been awarded, this "
