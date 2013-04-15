@@ -432,12 +432,13 @@ class Badge(models.Model):
     def get_upload_meta(self):
         return ("badge", self.slug)
 
-    def clean(self):
-        if self.image:
-            scaled_file = scale_image(self.image.file, IMG_MAX_SIZE)
-            if not scaled_file:
-                raise ValidationError(_('Cannot process image'))
-            self.image.file = scaled_file
+    # Crop and scale an image file.
+    # def clean(self):
+    #     if self.image:
+    #         scaled_file = scale_image(self.image.file, IMG_MAX_SIZE)
+    #         if not scaled_file:
+    #             raise ValidationError(_('Cannot process image'))
+    #         self.image.file = scaled_file
 
     def save(self, **kwargs):
         """Save the submission, updating slug and screenshot thumbnails"""
