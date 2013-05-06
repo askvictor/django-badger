@@ -89,7 +89,7 @@ badge_link.short_description = 'Badge'
 
 
 class AwardAdmin(admin.ModelAdmin):
-    raw_id_fields = ('user',)
+    raw_id_fields = ('user', 'creator',)
     list_display = (show_unicode, badge_link, show_image, 'claim_code', 'user',
                     'creator', 'created', )
     fields = ('badge', 'description', 'claim_code', 'user', 'creator', )
@@ -98,7 +98,7 @@ class AwardAdmin(admin.ModelAdmin):
 
 
 class ProgressAdmin(admin.ModelAdmin):
-    raw_id_fields = ('creator',)
+    raw_id_fields = ('user',)
 
 
 def claim_code_link(self):
@@ -128,7 +128,7 @@ award_link.short_description = 'award'
 
 
 class NominationAdmin(admin.ModelAdmin):
-    raw_id_fields = ('creator',)
+    raw_id_fields = ('creator', 'nominee', 'approver', 'rejected_by')
     list_display = ('id', show_unicode, award_link, 'accepted', 'nominee',
                     'approver', 'creator', 'created', 'modified',)
     list_filter = ('accepted',)
