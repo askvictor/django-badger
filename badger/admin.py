@@ -66,6 +66,7 @@ related_awards_link.short_description = "Awards"
 
 
 class BadgeAdmin(admin.ModelAdmin):
+    raw_id_fields = ('creator',)
     list_display = ("id", "title", show_image, "slug", "unique", "creator",
                     related_awards_link, related_deferredawards_link, "created",)
     list_display_links = ('id', 'title',)
@@ -97,7 +98,7 @@ class AwardAdmin(admin.ModelAdmin):
 
 
 class ProgressAdmin(admin.ModelAdmin):
-    pass
+    raw_id_fields = ('creator',)
 
 
 def claim_code_link(self):
@@ -127,6 +128,7 @@ award_link.short_description = 'award'
 
 
 class NominationAdmin(admin.ModelAdmin):
+    raw_id_fields = ('creator',)
     list_display = ('id', show_unicode, award_link, 'accepted', 'nominee',
                     'approver', 'creator', 'created', 'modified',)
     list_filter = ('accepted',)
