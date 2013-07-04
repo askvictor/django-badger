@@ -393,6 +393,9 @@ class Badge(models.Model):
             blank=True, null=True,
             help_text="When all of the selected badges have been awarded, this "
                       "badge will be automatically awarded.")
+    allows_awarding_badge = models.ForeignKey('self', blank=True, null=True, related_name='+',
+            help_text="Users who have have obtained the selected badge will be able to award the badge you are viewing")
+
     # TODO: Rename? Eventually we'll want a globally-unique badge. That is, one
     # unique award for one person for the whole site.
     unique = models.BooleanField(default=True,
@@ -489,6 +492,8 @@ class Badge(models.Model):
         if user.is_staff or user.is_superuser:
             return True
         if user == self.creator:
+            return True
+        if self.allows_awarding_badge.is_awarded_to(user):
             return True
 
         # TODO: List of delegates for whom awarding is allowed
