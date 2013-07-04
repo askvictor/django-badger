@@ -389,9 +389,11 @@ class Badge(models.Model):
     wb_image = models.ImageField(blank=True, null=True,
             storage=BADGE_UPLOADS_FS, upload_to=mk_upload_to('image', 'png'),
             help_text="Upload an white-black image to represent the badge")
+    prerequisites_number = models.PositiveIntegerField("number of prerequisites required", blank=True, null=True,
+            help_text="This many part-prerequisites have to be awarded to achieve this badge (0 or blank to require all)")
     prerequisites = models.ManyToManyField('self', symmetrical=False,
             blank=True, null=True,
-            help_text="When all of the selected badges have been awarded, this "
+            help_text="When the above number of the selected badges have been awarded, this "
                       "badge will be automatically awarded.")
     allows_awarding_badge = models.ForeignKey('self', blank=True, null=True, related_name='+',
             help_text="Users who have have obtained the selected badge will be able to award the badge you are viewing")
@@ -571,11 +573,17 @@ class Badge(models.Model):
             # Not unique, but badge auto-award from prerequisites should only
             # happen once.
             return None
+        award_count = 0
         for badge in self.prerequisites.all():
-            if not badge.is_awarded_to(awardee):
-                # Bail on the first unmet prerequisites
-                return None
-        return self.award_to(awardee)
+            if badge.is_awarded_to(awardee):
+                award_count += 1
+        if self.prerequisites_number:
+            if award_count >= self.prerequisites_number:
+                return self.award_to(awardee)
+        else:  # No pre-requisite number specified; need to check for all pre-requisites
+            if award_count >= self.prerequisites.all().count():
+                return self.award_to(awardee)
+        return None
 
     def is_awarded_to(self, user):
         """Has this badge been awarded to the user?"""
