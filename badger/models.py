@@ -20,7 +20,13 @@ from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.core.files.base import ContentFile
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth.models import AnonymousUser
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+except ImportError:
+    from django.contrib.auth.models import User
+
 from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
 
@@ -538,7 +544,7 @@ class Badge(models.Model):
 
         # If we have an email, but no awardee, try looking up the user.
         if email and not awardee:
-            qs = User.objects.filter(email=email)
+            qs = User.objects.filter(email=email) # TODO Won't work in django >= 1.5 as User is a string not a class
             if not qs:
                 # If there's no user for this email address, create a
                 # DeferredAward for future claiming.
@@ -636,7 +642,7 @@ class Badge(models.Model):
             issuer = {
                 # TODO: Get from user profile instead?
                 "origin": urljoin(base_url, self.creator.get_absolute_url()),
-                "name": self.creator.username,
+                "name": self.creator.username,  # TODO - username might not exist in custom user models
                 "contact": self.creator.email
             }
 
@@ -700,7 +706,7 @@ class Award(models.Model):
         return ('badger.views.award_detail', (self.badge.slug, self.pk))
 
     def get_upload_meta(self):
-        u = self.user.username
+        u = self.user.username  # TODO - username might not exist in custom user models
         return ("award/%s/%s/%s" % (u[0], u[1], u), self.badge.slug)
 
     def allows_detail_by(self, user):
@@ -778,7 +784,7 @@ class Award(models.Model):
             badge_data['issuer'] = {
                 # TODO: Get from user profile instead?
                 "origin": base_url,
-                "name": self.creator.username,
+                "name": self.creator.username,  # TODO - username might not exist in custom user models
                 "contact": self.creator.email
             }
 

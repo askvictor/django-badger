@@ -31,7 +31,11 @@ from django.views.decorators.http import (require_GET, require_POST,
 from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+except ImportError:
+    from django.contrib.auth.models import User
 
 try:
     import taggit
