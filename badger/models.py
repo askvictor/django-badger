@@ -696,7 +696,10 @@ class Award(models.Model):
         return ('badger.views.award_detail', (self.badge.slug, self.pk))
 
     def get_upload_meta(self):
-        u = self.user.username
+        try:
+            u = self.user.username
+        except AttributeError:
+            u = self.user.get_username()
         return ("award/%s/%s/%s" % (u[0], u[1], u), self.badge.slug)
 
     def allows_detail_by(self, user):
@@ -772,7 +775,7 @@ class Award(models.Model):
         # disclosed anywhere, but is it obscured enough?
         hash_salt = (hashlib.md5('%s-%s' % (self.badge.pk, self.pk))
                             .hexdigest())
-        recipient_text = '%s%s' % (self.user.email, hash_salt)
+        recipient_text = '%s%s' % (self.user.email, hash_salt)  # TODO - custom user models might not have email field
         recipient_hash = ('sha256$%s' % hashlib.sha256(recipient_text)
                                                .hexdigest())
         assertion = {

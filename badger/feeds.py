@@ -163,9 +163,13 @@ class AwardsFeed(BaseFeed):
         if not obj.creator:
             return None
         else:
+            try:
+                u = obj.creator.username
+            except AttributeError:
+                u = obj.creator.get_username()
             return self.request.build_absolute_uri(
                 reverse('badger.views.awards_by_user',
-                        args=(obj.creator.username,)))
+                        args=(u,)))
 
     def item_link(self, obj):
         return self.request.build_absolute_uri(
