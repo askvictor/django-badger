@@ -96,10 +96,9 @@ OBI_VERSION = "0.5.0"
 IMG_MAX_SIZE = getattr(settings, "BADGER_IMG_MAX_SIZE", (256, 256))
 
 SITE_ISSUER = getattr(settings, 'BADGER_SITE_ISSUER', {
-    "origin": "http://mozilla.org",
-    "name": "Badger",
-    "org": "Mozilla",
-    "contact": "lorchard@mozilla.com"
+    "url": "http://mozilla.org",
+    "name": "Mozilla",
+    "email": "lorchard@mozilla.com"
 })
 
 # Set up a file system for badge uploads that can be kept separate from the
@@ -637,17 +636,6 @@ class Badge(models.Model):
         else:
             base_url = 'http://%s' % (Site.objects.get_current().domain,)
 
-        # see: https://github.com/brianlovesdata/openbadges/wiki/Assertions
-        if not self.creator:
-            issuer = SITE_ISSUER
-        else:
-            issuer = {
-                # TODO: Get from user profile instead?
-                "origin": urljoin(base_url, self.creator.get_absolute_url()),
-                "name": self.creator.username,  # TODO - username might not exist in custom user models
-                "contact": self.creator.email
-            }
-
         data = {
             # The version of the spec/hub this manifest is compatible with. Use
             # "0.5.0" for the beta.
@@ -657,7 +645,7 @@ class Badge(models.Model):
             # TODO: truncate more intelligently
             "description": self.description[:128] or self.title[:128],
             "criteria": urljoin(base_url, self.get_absolute_url()),
-            "issuer": issuer
+            "issuer": SITE_ISSUER  # see: https://github.com/mozilla/openbadges/wiki/Assertions
         }
 
         image_url = self.image and self.image.url or DEFAULT_BADGE_IMAGE_URL
@@ -708,7 +696,7 @@ class Award(models.Model):
         return ('badger.views.award_detail', (self.badge.slug, self.pk))
 
     def get_upload_meta(self):
-        u = self.user.username  # TODO - username might not exist in custom user models
+        u = self.user.username
         return ("award/%s/%s/%s" % (u[0], u[1], u), self.badge.slug)
 
     def allows_detail_by(self, user):
@@ -778,17 +766,6 @@ class Award(models.Model):
             base_url = request.build_absolute_uri('/')[:-1]
         else:
             base_url = 'http://%s' % (Site.objects.get_current().domain,)
-
-        # If this award has a creator (ie. not system-issued), tweak the issuer
-        # data to reflect award creator.
-        # TODO: Is this actually a good idea? Or should issuer be site-wide
-        if self.creator:
-            badge_data['issuer'] = {
-                # TODO: Get from user profile instead?
-                "origin": base_url,
-                "name": self.creator.username,  # TODO - username might not exist in custom user models
-                "contact": self.creator.email
-            }
 
         # see: https://github.com/brianlovesdata/openbadges/wiki/Assertions
         # TODO: This salt is stable, and the badge.pk is generally not
