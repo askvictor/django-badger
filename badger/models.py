@@ -21,11 +21,15 @@ from django.core.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.models import User as UserModel
+
+# For custom user models we need to use a call to get_user_model() to get the user class
 try:
     from django.contrib.auth import get_user_model
-    User = get_user_model()
-except ImportError:
-    from django.contrib.auth.models import User
+except ImportError:  # django <= 1.4 doesn't have get_user_model(); define our own and return the stock User class
+    def get_user_model():
+        return UserModel
+User = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')  # Field definitions should use this
 
 from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
@@ -86,8 +90,6 @@ from .signals import (badge_will_be_awarded, badge_was_awarded,
                       nomination_will_be_accepted, nomination_was_accepted,
                       nomination_will_be_rejected, nomination_was_rejected,
                       user_will_be_nominated, user_was_nominated)
-
-User = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 OBI_VERSION = "0.5.0"
 
@@ -544,7 +546,7 @@ class Badge(models.Model):
 
         # If we have an email, but no awardee, try looking up the user.
         if email and not awardee:
-            qs = User.objects.filter(email=email) # TODO Won't work in django >= 1.5 as User is a string not a class
+            qs = get_user_model().objects.filter(email=email)
             if not qs:
                 # If there's no user for this email address, create a
                 # DeferredAward for future claiming.
