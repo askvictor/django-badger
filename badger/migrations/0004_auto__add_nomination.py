@@ -2,7 +2,7 @@
 import datetime
 from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models, DatabaseError
+from django.db import models, DatabaseError, connection
 
 
 try:
@@ -37,12 +37,7 @@ class Migration(SchemaMigration):
         """Determine whether the table exists."""
         # HACK: Digging into South's db guts, in order to route around the
         # usual error handling. I feel dirty. There must be a better way.
-        cursor = db._get_connection().cursor()
-        try:
-            cursor.execute("SELECT COUNT(*) FROM %s" % name)
-            return True
-        except DatabaseError:
-            return False
+        return name in connection.introspection.table_names()
 
     def _forwards_rename(self, orm):
         if self._table_exists(self.new_table_name):
